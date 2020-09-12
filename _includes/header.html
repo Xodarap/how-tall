@@ -1,0 +1,60 @@
+<header>
+  <div class="header-content">
+    <div class="header-content-inner">
+      <h1>How tall is he really?</h1>
+      <hr>
+      <p>TikTok has popularized the use of beauty identification algorithms. 
+      Want to know how one evaluates your facial appearance?</p>
+
+      <div class="col-sm-5 center-input">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <form id="ratingForm">
+              <div class="row">
+                <div class="form-group col-sm-10 center-input">
+                  <label for="exampleFormControlFile1">Full Body Photo</label>
+                  <input type="file" class="form-control-file" id="photo" accept="image/*;capture=camera">
+                  <div class="invalid-feedback" id="photoError">
+                    Please provide a valid photo.
+                  </div>
+                  <div class="invalid-feedback" id="dimensionError">
+                    Note: the algorithm only works if their full body is visible
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="center-input col-sm-10 preview-holder">
+                  <img id="preview" />
+                </div>
+              </div>
+              <div class="row">
+                <button type="submit" class="btn btn-primary btn-xl">Submit</button>
+              </div>
+              <div class="row">
+                <div class="loader-holder" id="loaderHolder">
+                  <div class="loader"></div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="center-input col-sm-10" id="resultsHolder">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h2 class="panel-title">Your TikTokBeautiful.com Results</h2>
+                    </div>
+                    <div class="panel-body" id="resultText"></div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <a href="#about" class="btn btn-primary btn page-scroll">More Details</a>
+    </div>
+  </div>
+</header>
