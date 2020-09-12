@@ -3,7 +3,27 @@
  * Code licensed under the Apache License v2.0.
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  */
+const cipher = salt => {
+    const textToChars = text => text.split('').map(c => c.charCodeAt(0));
+    const byteHex = n => ("0" + Number(n).toString(16)).substr(-2);
+    const applySaltToChar = code => textToChars(salt).reduce((a,b) => a ^ b, code);
 
+    return text => text.split('')
+        .map(textToChars)
+        .map(applySaltToChar)
+        .map(byteHex)
+        .join('');
+}
+
+const decipher = salt => {
+    const textToChars = text => text.split('').map(c => c.charCodeAt(0));
+    const applySaltToChar = code => textToChars(salt).reduce((a,b) => a ^ b, code);
+    return encoded => encoded.match(/.{1,2}/g)
+        .map(hex => parseInt(hex, 16))
+        .map(applySaltToChar)
+        .map(charCode => String.fromCharCode(charCode))
+        .join('');
+}
 class Result {
     constructor(result){
         this.result = result;
@@ -11,9 +31,8 @@ class Result {
     }
     
     generalDetection() {
-        var r = this.result.results[0].outputs.filter(x => x.model.name == "General Detection")[0].data.regions[0].data;
-        var man = r.filter(x => x.name == 'man')
         
+        debugger;
     }
 }
 
@@ -84,6 +103,8 @@ class Result {
             var img = new Image();
             $(img).on('load', function(imgEvent) {
                 var ratio = img.naturalHeight / img.naturalWidth;
+                img.height = img.naturalHeight;
+                img.width = img.naturalWidth;
                 if(ratio < 0.8 || ratio > 1.3) {
                     $('#dimensionError').show();
                 } else {
@@ -115,8 +136,8 @@ class Result {
             var ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
 
-            var MAX_WIDTH = 224;
-            var MAX_HEIGHT = 224;
+            var MAX_WIDTH = 102400;
+            var MAX_HEIGHT = 102400;
             var width = img.width;
             var height = img.height;
 
@@ -135,6 +156,8 @@ class Result {
             canvas.height = height;
             var ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
+            img.width = canvas.width;
+            img.height = canvas.height;
 
             cb(canvas, e.target.result);
         }
@@ -150,19 +173,25 @@ class Result {
         $('#loaderHolder').show();
         var file = $('#photo')[0].files[0];
         var after = function(canvas, result) {
-            var data = {
-                "inputs": [
-                    {
-                    "data": {
-                        "image": {
-                            'base64': result.replace(/^data:image\/(png|jpg|jpeg);base64,/, "")                       
-                        }
-                    }
-                }
+            var data = 
+            {
+                "requests": [
+                  {
+                    "image": {
+                      "content": result.replace(/^data:image\/(png|jpg|jpeg|webp);base64,/, "")   
+                    },
+                    "features": [
+                      {
+                        "maxResults": 10,
+                        "type": "OBJECT_LOCALIZATION"
+                      },
+                    ]
+                  }
                 ]
-            }
+              }
+            
             data = JSON.stringify(data);
-            var url = 'https://vision.googleapis.com/v1/images:annotate?key='
+            var url = 'https://vision.googleapis.com/v1/images:annotate?key=' + decipher('how-tall')("090132291b310b191f04290d7a11187b2d21013d1c232a7a2711221f0f3c0704210c06001f7c2f")
             $.ajax({url: url, 
                 data: data,
                 type: 'POST',
@@ -170,11 +199,12 @@ class Result {
                 processData: true,
                 headers: {'content-type': 'application/json'},
                 success: function(result){
-                    new Result(result);
+                    //new Result(result);
+                    var r = result.responses[0].localizedObjectAnnotations;
                     $('#loaderHolder').hide();
                     $('#resultsHolder').show();
                     $('#resultText').text(
-                        result
+                        r.map(x => x.name).join(',')
                     )
                 }   
             });   
