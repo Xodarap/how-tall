@@ -164,7 +164,11 @@ class Result {
         var match = c => drinks.filter(x => x.name == c).length > 0;
         if(match('beer') && match('bottle')) { return 'beer bottle'; }
         if(match('soda') && match('bottle')) { return 'soda bottle'; }
-        return 'unkown';
+        if(match('coffee') && match('cup')) { return 'coffee cup'; }
+        if(match('tea') && match('cup')) { return 'tea cup'; }
+        if(match('cup')) { return 'cup'; }
+        if(match('mug')) { return 'mug'; }
+        return 'unknown';
     }
 
     var drawBox = function(ctx, canvas, bb, color) {
@@ -184,36 +188,51 @@ class Result {
         var canvas = $('#myCanvas')[0]
         var ctx = canvas.getContext("2d")
         var personTitles = ['woman', 'man', 'guy', 'person'];
-        var drinkTitles = ['drink', 'icee', 'water', 'bottle', 'can', 'beer', 'soda'];
+        var drinkTitles = ['drink', 'icee', 'water', 'bottle', 'can', 'beer', 'soda',
+                            'cup', 'coffee', 'tea', 'mug'];
 
-        var results = regions.reduce((ac, r) => {
-            var bb = r.region_info.bounding_box;
-            var drinks = r.data.concepts.filter(x => $.inArray(x.name, drinkTitles) >= 0);
-            var people = r.data.concepts.filter(x => $.inArray(x.name, personTitles) >= 0);
-            if(drinks.length > 0 && people.length > 0) {
-                if(drinks[0].value > people[0].value){
-                    people = [];
-                } else {
-                    drinks = [];
-                }
+        var regionMatch = titles => region => region.data.concepts.filter(x=>$.inArray(x.name, titles) >= 0)
+        var drinkRegions = regions.filter(regionMatch(drinkTitles));
+        var personRegions = regions.filter(regionMatch(personTitles));
+        var drinksOnly = drinkRegions.filter(x => !personRegions.includes(x));
+        var personOnly = personRegions.filter(x => !drinkRegions.includes(x));
+        var both = personRegions.filter(x => drinkRegions.includes(x));
+        var results = {};
+
+        if(drinksOnly.length == 0 && personOnly.length == 0) {
+            // Use smaller one for drink
+            var bb1 = both[0].region_info.bounding_box;
+            var bb2 = both[0].region_info.bounding_box;
+
+            var bb1_height = bb1.bottom_row - bb1.top_row;
+            var bb2_height = bb2.bottom_row - bb2.top_row;
+            if(bb1_height < bb2_height) {
+                drinksOnly = [both[0]];
+                personOnly = [both[1]];
+            } else {
+                drinksOnly = [both[1]];
+                personOnly = [both[0]];
             }
-            if (drinks.length > 0){
-                console.log('drink')
-                ac.drink = bb.bottom_row - bb.top_row;
-                var length_diff = bb.right_col - bb.left_col;
-                // assume it's horizontal
-                if(length_diff > ac.drink) {
-                    ac.drink = length_diff;
-                }
-                ac.drink_type = identifyDrink(drinks);
-                drawBox(ctx, canvas, bb, 'red');
-            } else if (people.length > 0){
-                console.log('person')
-                ac.person = bb.bottom_row - bb.top_row;
-                drawBox(ctx, canvas, bb, 'blue');
+        }
+
+        if(drinksOnly.length > 0) {
+            var bb = drinksOnly[0].region_info.bounding_box;
+            results.drink = bb.bottom_row - bb.top_row;
+            var length_diff = bb.right_col - bb.left_col;
+            // assume it's horizontal
+            if(length_diff > results.drink) {
+                results.drink = length_diff;
             }
-            return ac;
-        }, {});
+            var drinks = drinksOnly[0].data.concepts.filter(x => $.inArray(x.name, drinkTitles) >= 0);
+            results.drink_type = identifyDrink(drinks);
+            drawBox(ctx, canvas, bb, 'red');
+        }
+
+        if(personOnly.length > 0) {            
+            var bb = personOnly[0].region_info.bounding_box;
+            results.person = bb.bottom_row - bb.top_row;
+            drawBox(ctx, canvas, bb, 'blue');
+        }
         return results;
     };
 
@@ -221,7 +240,10 @@ class Result {
         var drink = boxes.drink;
         var person = boxes.person;
         var ratio = person / drink;
-        var drink_height = {'beer bottle': 9, 'unknown': 6.25, 'soda bottle': 8}[boxes.drink_type]
+        var dictionary = {'beer bottle': 9, 'unknown': 6.25, 'soda bottle': 8,
+                            'coffee cup': 4.5, 'tea cup': 4.5, 'cup': 4.5, 
+                            'mug': 4};
+        var drink_height = dictionary[boxes.drink_type]
         var inches = drink_height * ratio;
         var feet = Math.floor(inches / 12);
         inches %= 12;
