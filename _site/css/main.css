@@ -133,7 +133,7 @@ body { -webkit-tap-highlight-color: #222; }
 
 #resultsHolder { margin-top: 25px; }
 
-#preview { border-radius: 15px; border: white 2px solid; margin-top: 10px; height: 224px; display: none; }
+#preview { border-radius: 15px; border: white 2px solid; margin-top: 10px; max-height: 224px; max-width: 224px; display: none; }
 
 .preview-holder { margin-bottom: 10px; }
 

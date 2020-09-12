@@ -163,14 +163,28 @@ class Result {
     var identifyDrink = function(drinks) {
         var match = c => drinks.filter(x => x.name == c).length > 0;
         if(match('beer') && match('bottle')) { return 'beer bottle'; }
+        if(match('soda') && match('bottle')) { return 'soda bottle'; }
         return 'unkown';
     }
+
+    var drawBox = function(ctx, canvas, bb, color) {
+        ctx.beginPath();
+        var l = bb.left_col * canvas.width;
+        var r = bb.right_col * canvas.width;
+        var t = bb.top_row * canvas.height;
+        var b = bb.bottom_row * canvas.height;
+        ctx.rect(l, t, r-l, b-t);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+    }
+
     var drawBoxes = function(result) {
         var regions = result.results[0].outputs[1].data.regions;
         var canvas = $('#myCanvas')[0]
         var ctx = canvas.getContext("2d")
         var personTitles = ['woman', 'man', 'guy', 'person'];
-        var drinkTitles = ['drink', 'icee', 'water', 'bottle', 'can', 'beer'];
+        var drinkTitles = ['drink', 'icee', 'water', 'bottle', 'can', 'beer', 'soda'];
 
         var results = regions.reduce((ac, r) => {
             var bb = r.region_info.bounding_box;
@@ -192,21 +206,11 @@ class Result {
                     ac.drink = length_diff;
                 }
                 ac.drink_type = identifyDrink(drinks);
+                drawBox(ctx, canvas, bb, 'red');
             } else if (people.length > 0){
                 console.log('person')
                 ac.person = bb.bottom_row - bb.top_row;
-            }
-
-            if(drinks.length > 0 || people.length > 0 ){
-                ctx.beginPath();
-                var l = bb.left_col * canvas.width;
-                var r = bb.right_col * canvas.width;
-                var t = bb.top_row * canvas.height;
-                var b = bb.bottom_row * canvas.height;
-                ctx.rect(l, t, r-l, b-t);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = 'black';
-                ctx.stroke();
+                drawBox(ctx, canvas, bb, 'blue');
             }
             return ac;
         }, {});
@@ -217,7 +221,7 @@ class Result {
         var drink = boxes.drink;
         var person = boxes.person;
         var ratio = person / drink;
-        var drink_height = {'beer bottle': 9, 'unknown': 6.25}[boxes.drink_type]
+        var drink_height = {'beer bottle': 9, 'unknown': 6.25, 'soda bottle': 8}[boxes.drink_type]
         var inches = drink_height * ratio;
         var feet = Math.floor(inches / 12);
         inches %= 12;
