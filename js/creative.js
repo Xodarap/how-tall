@@ -229,7 +229,7 @@ class Result {
             $('#resultText').text(
                 'I believe this person is holding a ' + r.drink_type + ' which I am assuming to be ' + d.drink_height + ' inches tall. ' +
                 'This person is ' + d.ratio.toFixed(2) + ' times taller than the drink, implying a height of ' +
-                d.feet + "'" + d.inches.toFixed(0) + '".'
+                d.feet + "'" + Math.floor(d.inches) + '".'
             )
         } else if (r.drink === undefined) {            
             $('#resultText').text('Error: Could not find a drink');
