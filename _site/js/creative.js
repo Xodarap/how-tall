@@ -218,6 +218,10 @@ class Result {
             personRegions.length > 1) {
                 drinksOnly = [both[0]];
                 personOnly = personRegions.filter(x => x != both[0])
+        } else if (personOnly.length == 0 && both.length > 0 &&
+            drinkRegions.length > 1) {
+                personOnly = [both[0]];
+                drinksOnly = drinkRegions.filter(x => x != both[0])
         }
 
         if(drinksOnly.length > 0) {
