@@ -191,7 +191,7 @@ class Result {
         var drinkTitles = ['drink', 'icee', 'water', 'bottle', 'can', 'beer', 'soda',
                             'cup', 'coffee', 'tea', 'mug'];
 
-        var regionMatch = titles => region => region.data.concepts.filter(x=>$.inArray(x.name, titles) >= 0)
+        var regionMatch = titles => region => region.data.concepts.filter(x=> titles.includes(x.name)).length > 0
         var drinkRegions = regions.filter(regionMatch(drinkTitles));
         var personRegions = regions.filter(regionMatch(personTitles));
         var drinksOnly = drinkRegions.filter(x => !personRegions.includes(x));
@@ -199,7 +199,8 @@ class Result {
         var both = personRegions.filter(x => drinkRegions.includes(x));
         var results = {};
 
-        if(drinksOnly.length == 0 && personOnly.length == 0) {
+        if(drinksOnly.length == 0 && personOnly.length == 0 &&
+            both.length >= 2) {
             // Use smaller one for drink
             var bb1 = both[0].region_info.bounding_box;
             var bb2 = both[0].region_info.bounding_box;
@@ -213,6 +214,10 @@ class Result {
                 drinksOnly = [both[1]];
                 personOnly = [both[0]];
             }
+        } else if (drinksOnly.length == 0 && both.length > 0 &&
+            personOnly.length > 1) {
+                drinksOnly = [both[0]];
+                personOnly = personOnly.filter(x => !both.includes(x))
         }
 
         if(drinksOnly.length > 0) {
