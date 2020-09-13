@@ -133,7 +133,7 @@ class Result {
             ctx.drawImage(img, 0, 0);
 
             var MAX_WIDTH = 224;
-            var MAX_HEIGHT = 224;
+            var MAX_HEIGHT = 300;
             var width = img.width;
             var height = img.height;
 
@@ -168,7 +168,7 @@ class Result {
         if(match('tea') && match('cup')) { return 'tea cup'; }
         if(match('cup')) { return 'cup'; }
         if(match('mug')) { return 'mug'; }
-        return 'unknown';
+        return 'generic drink';
     }
 
     var drawBox = function(ctx, canvas, bb, color) {
@@ -215,9 +215,9 @@ class Result {
                 personOnly = [both[0]];
             }
         } else if (drinksOnly.length == 0 && both.length > 0 &&
-            personOnly.length > 1) {
+            personRegions.length > 1) {
                 drinksOnly = [both[0]];
-                personOnly = personOnly.filter(x => !both.includes(x))
+                personOnly = personRegions.filter(x => x != both[0])
         }
 
         if(drinksOnly.length > 0) {
@@ -245,7 +245,7 @@ class Result {
         var drink = boxes.drink;
         var person = boxes.person;
         var ratio = person / drink;
-        var dictionary = {'beer bottle': 9, 'unknown': 6.25, 'soda bottle': 8,
+        var dictionary = {'beer bottle': 9, 'generic drink': 6.25, 'soda bottle': 8,
                             'coffee cup': 4.5, 'tea cup': 4.5, 'cup': 4.5, 
                             'mug': 4};
         var drink_height = dictionary[boxes.drink_type]
