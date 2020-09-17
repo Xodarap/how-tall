@@ -24,17 +24,8 @@ const decipher = salt => {
         .map(charCode => String.fromCharCode(charCode))
         .join('');
 }
-class Result {
-    constructor(result){
-        this.result = result;
-        this.general = this.generalDetection();
-    }
-    
-    generalDetection() {
-        
-        debugger;
-    }
-}
+
+window.ben = {};
 
 (function($) {
     "use strict"; // Start of use strict
@@ -244,15 +235,23 @@ class Result {
         }
         return results;
     };
+    var heightDictionary = {'beer bottle': 9, 'generic drink': 6.25, 'soda bottle': 8,
+    'coffee cup': 4.5, 'tea cup': 4.5, 'cup': 4.5, 
+    'mug': 4, 'stubby': 6.25, 'long neck': 9, 'bomber': 11,
+    'mini growler': 9, 'growler': 11, 'Corona': 9.5, 'Rouge Dead Guy Ale': 9.204,
+    'Pacifico': 9.579, 'Stone Ruination': 11.117, 'Shock Top': 9};
 
     var heightDifference = function(boxes) {
         var drink = boxes.drink;
         var person = boxes.person;
         var ratio = person / drink;
-        var dictionary = {'beer bottle': 9, 'generic drink': 6.25, 'soda bottle': 8,
-                            'coffee cup': 4.5, 'tea cup': 4.5, 'cup': 4.5, 
-                            'mug': 4};
-        var drink_height = dictionary[boxes.drink_type]
+        window.ben.ratio = ratio;
+
+        var drink_height = heightDictionary[boxes.drink_type]
+        return heightCalculations(ratio, drink_height);
+    }
+
+    var heightCalculations = function(ratio, drink_height) {
         var inches = drink_height * ratio;
         var feet = Math.floor(inches / 12);
         inches %= 12;
@@ -273,6 +272,14 @@ class Result {
         }
     }
 
+    $('#drinkType').change(event => {
+        var drink_height = heightDictionary[$('#drinkType').val()];
+        var d = heightCalculations(window.ben.ratio, drink_height);
+        var r = {
+            drink_type: $('#drinkType').val()
+        }
+        displayResults(d, r);
+    })
     $('#ratingForm').submit(function(event){
         event.preventDefault();
         if(!validate()) {
