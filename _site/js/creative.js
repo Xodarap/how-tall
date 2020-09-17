@@ -239,7 +239,8 @@ window.ben = {};
     'coffee cup': 4.5, 'tea cup': 4.5, 'cup': 4.5, 
     'mug': 4, 'stubby': 6.25, 'long neck': 9, 'bomber': 11,
     'mini growler': 9, 'growler': 11, 'Corona': 9.5, 'Rouge Dead Guy Ale': 9.204,
-    'Pacifico': 9.579, 'Stone Ruination': 11.117, 'Shock Top': 9};
+    'Pacifico': 9.579, 'Stone Ruination': 11.117, 'Shock Top': 9,
+    'Sierra Nevada': 7.777};
 
     var heightDifference = function(boxes) {
         var drink = boxes.drink;
